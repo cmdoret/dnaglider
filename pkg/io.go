@@ -39,3 +39,29 @@ func StreamGenome(fasta string, bufSize int) <-chan fastx.Record {
 	return recordChan
 
 }
+
+// FastaToKmers reads all records in a fasta file and computes its k-mer profile
+func FastaToKmers(fasta string, k int) KmerProfile {
+	var record *fastx.Record
+	var profile = KmerProfile{k, make(map[string]float64)}
+	reader, err := fastx.NewDefaultReader(fasta)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(-1)
+	}
+	for {
+		record, err = reader.Read()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			log.Fatal(err)
+			break
+		}
+		// Add K-mer counts for each record
+		profile.GetSeqKmers(record.Seq)
+	}
+	// Once all records have been computed, convert to freqs
+	profile.CountsToFreqs()
+	return profile
+}
