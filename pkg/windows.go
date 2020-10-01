@@ -1,8 +1,6 @@
 package pkg
 
 import (
-	"fmt"
-
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
 )
@@ -17,6 +15,13 @@ type Chunk struct {
 	wSize   int
 	Seq     *seq.Seq
 	Starts  []int
+}
+
+// ChunkResult stores the computed statistics of windows from a chunk in the
+// form of a table. Each row is a window, each column is a feature.
+type ChunkResult struct {
+	Header []string
+	Data   [][]string
 }
 
 // MinInt returns the smallest of two integers. If both are equal, the second
@@ -39,19 +44,28 @@ func MakeRange(start, end, step int) []int {
 	return arr
 }
 
+// Build2dSlice builds a 2d slice of float64 of target size
+func Build2dSlice(rows int, cols int) [][]string {
+	slice2d := make([][]string, rows)
+	for i := range slice2d {
+		slice2d[i] = make([]string, cols)
+	}
+	return slice2d
+}
+
 // ChunkGenome receives fastx.Record from a channel and produces a channel of record
 // chunks. Each chunk contains multiple windows. The chunkSize is given in number of
 // windows, and the windows size is in basepair
 func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan Chunk {
-	chunkLen := chunkSize * winSize
+	chunkLen := chunkSize * winSze
 	chunks := make(chan Chunk, 3)
+	var bpStart, bpEnd int
+	var bpStart, bpEnd int
 	go func() {
-		var bpStart, bpEnd int
-		// Need to add overlap between chunks
 		for rec := range records {
-			seqLen := len(rec.Seq.Seq)
-			bpStart = 1
+			seqLen = len(rec.Seq.Seq)
 			bpEnd = 0
+			bpStart = 1
 			for bpEnd < seqLen {
 				bpEnd = MinInt(bpStart+chunkLen, seqLen)
 				chunk := Chunk{
@@ -73,26 +87,29 @@ func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan
 	return chunks
 }
 
-// ConsumeChunks computes window-based statistics in chunks
-func ConsumeChunks(chunks <-chan Chunk) chan string {
-	var chunkStr string
-	out := make(chan string, 1)
+// ConsumeChunks computes window-based statistics in chunks and stores them in a ChunkResult struct.
+func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile [int]KmerProfile) chan ChunkResult {
+	// There are 3 columns for coordinates (chrom start end), and 1 per feature
+	nFeatures := 3 + len(refProfile) + len(metrics)
+	// Generate column names
+	header := []string{"chrom", "start", "end"}
+	header = append(header, metrics)
+	header = append()
+	for i, col := range  {
+		header[i] = col
+	}
+
 	go func() {
 		for chunk := range chunks {
-			chunkStr = ""
-			for _, start := range chunk.Starts {
-				chunkStr += fmt.Sprintf(
-					"%s\t%d\t%d\t%f\n",
-					chunk.ID,
-					chunk.BpStart+start,
-					chunk.BpStart+start+chunk.wSize,
-					SeqGC(chunk.Seq.SubSeq(start+1, start+chunk.wSize)),
-				)
+			nWindows := len(chunk.Starts)
+			results := ChunkResult{header, Build2dSlice(nWindows, nFeatures)}
+			for i, start := range chunk.Starts {
+				result.Data[i][0] = chunk.ID
+				result.Data[i][1] = chunk.BpStart + start
+				result.Data[i][2] = chunk.BpStart + start + chunk.wSize
 			}
-			out <- chunkStr
 		}
 		close(out)
-		return
 	}()
 	return out
 }
