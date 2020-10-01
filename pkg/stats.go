@@ -1,7 +1,10 @@
 package pkg
 
 import (
+	"fmt"
 	"math"
+	"os"
+	"regexp"
 
 	"github.com/shenwei356/bio/seq"
 )
@@ -30,7 +33,22 @@ func SeqEntropy(seq *seq.Seq) float64 {
 	return entro
 }
 
-// TODO: Add a function to compute vectors of k-mer frequencies.
-// These k-mer frequencies need to be compared against a reference
-// profile and some distance metric can then be computed between each
-// window's vector and the reference.
+// SelectFieldStat will run a function to compute a metric on input sequence
+// the metric is selected according to the input field name.
+func SelectFieldStat(field string, seq *seq.Seq, ref KmerProfile) float64 {
+	kmerRegex := regexp.MustCompile("[0-9]+MER")
+	switch field {
+	case "GC":
+		return SeqGC(seq)
+	case "SKEW":
+		return SeqGCSkew(seq)
+	case "ENTRO":
+		return SeqEntropy(seq)
+	case kmerRegex.Match(field):
+		// TODO: Compute Kmer profile and distance
+	default:
+		fmt.Printf("Error: Invalid metric: %s.\n", field)
+		os.Exit(-1)
+	}
+
+}
