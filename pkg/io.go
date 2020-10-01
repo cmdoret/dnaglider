@@ -1,4 +1,4 @@
-package dnaslider
+package pkg
 
 import (
 	"io"
@@ -10,10 +10,10 @@ import (
 
 // StreamGenome reads records one by one from an input fasta file and sends them
 // to a channel for downstream processing
-func StreamGenome(Fasta string) <-chan fastx.Record {
+func StreamGenome(fasta string, bufSize int) <-chan fastx.Record {
 	var record *fastx.Record
-	recordChan := make(chan fastx.Record)
-	reader, err := fastx.NewDefaultReader(Fasta)
+	recordChan := make(chan fastx.Record, bufSize)
+	reader, err := fastx.NewDefaultReader(fasta)
 	// Can't read input path
 	if err != nil {
 		log.Fatal(err)
@@ -26,8 +26,10 @@ func StreamGenome(Fasta string) <-chan fastx.Record {
 			if err != nil {
 				// Reached last record
 				if err == io.EOF {
-					break
+					close(recordChan)
+					return
 				}
+				log.Fatal(err)
 				break
 			}
 			recordChan <- *record
