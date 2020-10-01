@@ -2,6 +2,7 @@ package cli
 
 import (
 	"flag"
+	"fmt"
 	"runtime"
 
 	"../pkg"
@@ -22,10 +23,13 @@ func Run() (err error) {
 	var winSize, chunkSize int
 	runtime.GOMAXPROCS(*threads)
 	*fasta = "./tests/genome.fa"
-	winSize = 1000
-	chunkSize = 1000
+	winSize = 10
+	chunkSize = 100
 	genome := pkg.StreamGenome(*fasta, 3)
 	chunks := pkg.ChunkGenome(genome, winSize, chunkSize)
-	pkg.ConsumeChunks(chunks)
+	out := pkg.ConsumeChunks(chunks)
+	for chunk := range out {
+		fmt.Printf("%s", chunk)
+	}
 	return nil
 }
