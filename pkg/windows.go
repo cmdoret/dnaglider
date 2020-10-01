@@ -43,42 +43,56 @@ func MakeRange(start, end, step int) []int {
 // chunks. Each chunk contains multiple windows. The chunkSize is given in number of
 // windows, and the windows size is in basepair
 func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan Chunk {
-	var bpStart, bpEnd int
 	chunkLen := chunkSize * winSize
-	wins := make(chan Chunk)
+	chunks := make(chan Chunk, 3)
 	go func() {
+		var bpStart, bpEnd int
 		// Need to add overlap between chunks
 		for rec := range records {
 			seqLen := len(rec.Seq.Seq)
-			bpEnd = MinInt(bpStart+chunkLen, seqLen)
-			chunk := Chunk{
-				ID:      rec.ID,
-				BpStart: bpStart,
-				BpEnd:   bpEnd,
-				Starts:  MakeRange(0, seqLen, winSize),
-				wSize:   winSize,
+			bpStart = 1
+			bpEnd = 0
+			for bpEnd < seqLen {
+				bpEnd = MinInt(bpStart+chunkLen, seqLen)
+				chunk := Chunk{
+					ID:      rec.ID,
+					BpStart: bpStart,
+					BpEnd:   bpEnd,
+					Starts:  MakeRange(0, bpEnd-bpStart, winSize),
+					wSize:   winSize,
+					Seq:     rec.Seq.SubSeq(bpStart, bpEnd),
+				}
+
+				chunks <- chunk
+				bpStart = bpEnd
 			}
-			wins <- chunk
-			bpStart = bpEnd
 		}
-		close(wins)
+		close(chunks)
+		return
 	}()
-	return wins
+	return chunks
 }
 
 // ConsumeChunks computes window-based statistics in chunks
-func ConsumeChunks(chunks <-chan Chunk) {
-	var end int
+func ConsumeChunks(chunks <-chan Chunk) chan string {
+	var chunkStr string
+	out := make(chan string, 1)
 	go func() {
 		for chunk := range chunks {
-			winStart := chunk.BpStart
-			for start := range chunk.Starts {
-				end = start + chunk.wSize
-				gc := SeqGC(chunk.Seq.SubSeq(start, end))
-				fmt.Printf("%s\t%d\t%d\t%f", chunk.ID, winStart, winStart+chunk.wSize, gc)
-				winStart += chunk.wSize
-
+			chunkStr = ""
+			for _, start := range chunk.Starts {
+				chunkStr += fmt.Sprintf(
+					"%s\t%d\t%d\t%f\n",
+					chunk.ID,
+					chunk.BpStart+start,
+					chunk.BpStart+start+chunk.wSize,
+					SeqGC(chunk.Seq.SubSeq(start+1, start+chunk.wSize)),
+				)
 			}
+			out <- chunkStr
 		}
+		close(out)
+		return
 	}()
+	return out
 }
