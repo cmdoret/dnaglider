@@ -32,10 +32,9 @@ func StreamGenome(fasta string, bufSize int) <-chan fastx.Record {
 				log.Fatal(err)
 				break
 			}
-			recordChan <- *record
+			recordChan <- *record.Clone()
 		}
 		close(recordChan)
-		return
 	}()
 	return recordChan
 
