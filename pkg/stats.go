@@ -19,7 +19,20 @@ func SeqGC(seq *seq.Seq) float64 {
 func SeqGCSkew(seq *seq.Seq) float64 {
 	c := seq.BaseContent("c")
 	g := seq.BaseContent("g")
+	if g+c == 0 {
+		return math.NaN()
+	}
 	return (g - c) / (g + c)
+}
+
+// SeqATSkew computes the AT skew of a DNA sequence.
+func SeqATSkew(seq *seq.Seq) float64 {
+	a := seq.BaseContent("a")
+	t := seq.BaseContent("t")
+	if a+t == 0 {
+		return math.NaN()
+	}
+	return (a - t) / (a + t)
 }
 
 // SeqEntropy computes the Shannon entropy (information entropy)
@@ -43,8 +56,10 @@ func SelectFieldStat(field string, seq *seq.Seq, ref map[int]KmerProfile) (float
 	switch field {
 	case "GC":
 		return SeqGC(seq), err
-	case "SKEW":
+	case "GCSKEW":
 		return SeqGCSkew(seq), err
+	case "ATSKEW":
+		return SeqATSkew(seq), err
 	case "ENTRO":
 		return SeqEntropy(seq), err
 	default:

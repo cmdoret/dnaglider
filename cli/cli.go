@@ -24,7 +24,8 @@ var (
 		"Statistics to report in output fields. Multiple comma-separated "+
 			"values can be provided.\nValid fields are: \n"+
 			"\tGC: GC content (0 to 1)\n"+
-			"\tSKEW: G/C skew (-1 to 1)\n"+
+			"\tGCSKEW: G/C skew (-1 to 1)\n"+
+			"\tATSKEW: A/T skew (-1 to 1)\n"+
 			"\tENTRO: Information entropy of the sequence (0 to 1)\n"+
 			"\tKMER: K-mer divergence from the reference (euclidean distance)\n",
 	)
