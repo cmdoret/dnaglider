@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"fmt"
+
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
 )
@@ -57,10 +59,9 @@ func Build2dSlice(rows int, cols int) [][]string {
 // chunks. Each chunk contains multiple windows. The chunkSize is given in number of
 // windows, and the windows size is in basepair
 func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan Chunk {
-	chunkLen := chunkSize * winSze
+	chunkLen := chunkSize * winSize
 	chunks := make(chan Chunk, 3)
-	var bpStart, bpEnd int
-	var bpStart, bpEnd int
+	var bpStart, bpEnd, seqLen int
 	go func() {
 		for rec := range records {
 			seqLen = len(rec.Seq.Seq)
@@ -88,28 +89,33 @@ func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan
 }
 
 // ConsumeChunks computes window-based statistics in chunks and stores them in a ChunkResult struct.
-func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile [int]KmerProfile) chan ChunkResult {
+func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]KmerProfile) chan ChunkResult {
+	var stat float64
+	out := make(chan ChunkResult)
 	// There are 3 columns for coordinates (chrom start end), and 1 per feature
 	nFeatures := 3 + len(refProfile) + len(metrics)
 	// Generate column names
 	header := []string{"chrom", "start", "end"}
-	header = append(header, metrics)
-	header = append()
-	for i, col := range  {
-		header[i] = col
-	}
+	header = append(header, metrics...)
 
 	go func() {
 		for chunk := range chunks {
 			nWindows := len(chunk.Starts)
 			results := ChunkResult{header, Build2dSlice(nWindows, nFeatures)}
-			for i, start := range chunk.Starts {
-				result.Data[i][0] = chunk.ID
-				result.Data[i][1] = chunk.BpStart + start
-				result.Data[i][2] = chunk.BpStart + start + chunk.wSize
+			for winID, start := range chunk.Starts {
+				results.Data[winID][0] = fmt.Sprint(string(chunk.ID))
+				results.Data[winID][1] = fmt.Sprint(chunk.BpStart + start)
+				results.Data[winID][2] = fmt.Sprint(chunk.BpStart + start + chunk.wSize - 1)
+				winSeq := chunk.Seq.SubSeq(start+1, start+chunk.wSize)
+				for colNum, metric := range header[3:] {
+					stat, _ = SelectFieldStat(metric, winSeq, refProfile)
+					results.Data[winID][colNum+3] = fmt.Sprintf("%f", stat)
+				}
 			}
+			out <- results
 		}
 		close(out)
+		return
 	}()
 	return out
 }
