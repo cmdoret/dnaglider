@@ -68,7 +68,7 @@ func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan
 			bpEnd = 0
 			bpStart = 1
 			for bpEnd < seqLen {
-				bpEnd = MinInt(bpStart+chunkLen, seqLen)
+				bpEnd = MinInt(bpStart+chunkLen-1, seqLen)
 				chunk := Chunk{
 					ID:      rec.ID,
 					BpStart: bpStart,
@@ -79,7 +79,7 @@ func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan
 				}
 
 				chunks <- chunk
-				bpStart = bpEnd
+				bpStart = bpEnd + 1
 			}
 		}
 		close(chunks)
