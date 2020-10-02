@@ -1,8 +1,9 @@
 package cli
 
 import (
+	"encoding/csv"
 	"flag"
-	"fmt"
+	"io"
 	"log"
 	"os"
 	"runtime"
@@ -15,6 +16,7 @@ import (
 // Command-line flags.
 var (
 	fasta   = flag.String("fasta", "-", "Input genome. '-' reads from stdin.")
+	out     = flag.String("out", "-", "Path to output file. '-' writes to stdout.")
 	threads = flag.Int("threads", 1, "Number of CPU threads")
 	fields  = flag.String(
 		"fields",
@@ -37,41 +39,73 @@ var (
 	version = flag.String("version", "0.0.0", "Version")
 )
 
-// Run reads input genome, chunk it, compute statistics in sliding
-// windows and report them
-func Run() (err error) {
-	var winSize, chunkSize int
-	// We'll store the reference profile for each k-mer length
-	var refProfile map[int]pkg.KmerProfile
-	var kmerLengths []int
-	flag.Parse()
-	runtime.GOMAXPROCS(*threads)
-	// Parse fields to compute
-	metrics := strings.Split(*fields, ",")
+// Given a string of comma-separated field names, and a string of
+// comma-separated k-mer lengths, build a list of field names. If
+// KMER is amon field names, a new field will be generated for each
+// k-mer length (e.g. 4MER, 5MER). Otherwise, they will be ignored.
+func parseFields(fieldString string, kmerString string) ([]string, []int) {
+	metrics := strings.Split(fieldString, ",")
+	kmers := strings.Split(kmerString, ",")
+	outFields := make([]string, 0)
+	outLengths := make([]int, 0)
 	for _, metric := range metrics {
 		// If k-mers are requested, parse lengths
 		if metric == "KMER" {
-			for _, k := range strings.Split(*kmers, ",") {
+			for _, k := range kmers {
 				kInt, err := strconv.Atoi(k)
 				if err != nil {
 					log.Fatal(err)
 					os.Exit(-1)
 				}
-				kmerLengths = append(kmerLengths, kInt)
+				outLengths = append(outLengths, kInt)
+				outFields = append(outFields, k+"MER")
 			}
+		} else {
+			outFields = append(outFields, metric)
 		}
 	}
-	// For each requested length, get the reference k-mer profile
+	return outFields, outLengths
+}
+
+// Run reads input genome, chunk it, compute statistics in sliding
+// windows and report them
+func Run() (err error) {
+	var outf io.Writer
+	var chunkSize int
+	// We'll store the reference profile for each k-mer length
+	var refProfile map[int]pkg.KmerProfile
+	var kmerLengths []int
+	flag.Parse()
+	metrics, kmerLengths := parseFields(*fields, *kmers)
+	runtime.GOMAXPROCS(*threads)
+	//*fasta = "./tests/genome.fa" // DEBUG
+	// For each requested kmer length, get the reference profile
 	for _, k := range kmerLengths {
 		refProfile[k] = pkg.FastaToKmers(*fasta, k)
 	}
-	*fasta = "./tests/genome.fa"
 	chunkSize = 1000
 	genome := pkg.StreamGenome(*fasta, 3)
-	chunks := pkg.ChunkGenome(genome, winSize, chunkSize)
-	out := pkg.ConsumeChunks(chunks, metrics, refProfile)
-	for chunk := range out {
-		fmt.Printf("%s", chunk)
+	chunks := pkg.ChunkGenome(genome, *winSize, chunkSize)
+	results := pkg.ConsumeChunks(chunks, metrics, refProfile)
+	// Format each chunk's results into CSV and sends it to an io.writer.
+	if *out == "-" {
+		outf = os.Stdout
+	} else {
+		outf, err = os.Create(*out)
+		if err != nil {
+			log.Fatal("Error opening output file: ", err)
+		}
+	}
+	w := csv.NewWriter(outf)
+	w.Comma = '\t'
+	res := <-results
+	w.Write(res.Header)
+	w.WriteAll(res.Data)
+	for res := range results {
+		w.WriteAll(res.Data)
+		if err := w.Error(); err != nil {
+			log.Fatal("Error writing csv: ", err)
+		}
 	}
 	return nil
 }
