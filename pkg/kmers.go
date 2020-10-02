@@ -51,10 +51,10 @@ func (p *KmerProfile) CountsToFreqs() {
 // KmerDist computes the euclidean distance between a reference k-mer profile
 // and another profile. The reference is assumed to include all k-mers
 // present in the profile.
-func (p *KmerProfile) KmerDist(ref KmerProfile, profile map[string]float64) float64 {
+func (p *KmerProfile) KmerDist(ref KmerProfile) float64 {
 	var dist float64
 	for kmer, freq := range ref.Profile {
-		dist += math.Pow(freq-profile[kmer], 2.0)
+		dist += math.Pow(freq-p.Profile[kmer], 2.0)
 	}
 	dist = math.Sqrt(dist)
 	return dist
