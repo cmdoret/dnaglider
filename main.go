@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"./cli"
+	"github.com/cmdoret/dnaglider/cli"
 )
 
 func main() {

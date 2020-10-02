@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"../pkg"
+	"github.com/cmdoret/dnaglider/pkg"
 )
 
 // Command-line flags.
