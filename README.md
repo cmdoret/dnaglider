@@ -4,16 +4,27 @@ Command line utility to compute sliding window genome statistics from a fasta fi
 
 ### Installation:
 
-If [go is installed](https://golang.org/doc/install) on the machine, the program can be built from source using: `go install github.com/cmdoret/dnaglider`. Otherwise, binaries can be downloaded from the github repository.
+If [go is installed](https://golang.org/doc/install) on the machine, the program can be built from source using: 
+
+```bash
+go install github.com/cmdoret/dnaglider/dnaglider
+```
+
+Otherwise, binaries can be downloaded from the github repository.
 
 ### Usage:
 
 dnaglider only requires a genome. You can also select a window size and what metrics to compute. For example to compute GC content and GC skew on 8 threads:
-`dnaglider -window 1000 -threads 8 -fields "GC,GCSKEW" -fasta ./mygenome.fasta -out gc_stats.tsv`
+
+```bash
+dnaglider -window 1000 -threads 8 -fields "GC,GCSKEW" -fasta ./mygenome.fasta -out gc_stats.tsv
+```
 
 Instead of working with input / output files, the program reads from stdin and write to stdout by deault:
 
-`some command genome.fa | dnaglider -fields "GC,GCSKEW" | grep "chr10" > gc_stats_chr10.tsv`
+```bash
+some command genome.fa | dnaglider -fields "GC,GCSKEW" | grep "chr10" > gc_stats_chr10.tsv
+```
 
 ```
 Usage of dnaglider:
