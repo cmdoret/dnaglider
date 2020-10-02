@@ -3,7 +3,6 @@ package pkg
 import (
 	"fmt"
 	"math"
-	"os"
 	"regexp"
 	"strconv"
 
@@ -70,8 +69,7 @@ func SelectFieldStat(field string, seq *seq.Seq, ref map[int]KmerProfile) (float
 			prof := KmerProfile{k, make(map[string]float64)}
 			return prof.KmerDist(ref[k]), err
 		}
-		fmt.Printf("Error: Invalid metric: %s.\n", field)
-		os.Exit(-1)
+		err = fmt.Errorf("Invalid metric: %s", field)
 	}
-	return 0.0, err
+	return math.NaN(), err
 }

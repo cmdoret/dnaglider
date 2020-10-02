@@ -2,6 +2,8 @@ package pkg
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
@@ -92,6 +94,7 @@ func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan
 func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]KmerProfile) chan ChunkResult {
 	var end int
 	var stat float64
+	var err error
 	out := make(chan ChunkResult)
 	// There are 3 columns for coordinates (chrom start end), and 1 per feature
 	nFeatures := 3 + len(refProfile) + len(metrics)
@@ -110,9 +113,13 @@ func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]Kme
 				results.Data[winID][2] = fmt.Sprint(end)
 				winSeq := chunk.Seq.SubSeq(start+1, start+chunk.wSize)
 				for colNum, metric := range header[3:] {
-					stat, _ = SelectFieldStat(metric, winSeq, refProfile)
+					stat, err = SelectFieldStat(metric, winSeq, refProfile)
 					results.Data[winID][colNum+3] = fmt.Sprintf("%f", stat)
 				}
+			}
+			if err != nil {
+				log.Fatal(err)
+				os.Exit(-1)
 			}
 			out <- results
 		}
