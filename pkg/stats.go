@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"strconv"
 
 	"github.com/shenwei356/bio/seq"
 )
@@ -35,20 +36,26 @@ func SeqEntropy(seq *seq.Seq) float64 {
 
 // SelectFieldStat will run a function to compute a metric on input sequence
 // the metric is selected according to the input field name.
-func SelectFieldStat(field string, seq *seq.Seq, ref KmerProfile) float64 {
-	kmerRegex := regexp.MustCompile("[0-9]+MER")
+func SelectFieldStat(field string, seq *seq.Seq, ref map[int]KmerProfile) (float64, error) {
+	var err error
+	kmerRegex := regexp.MustCompile("([0-9]+)MER")
 	switch field {
 	case "GC":
-		return SeqGC(seq)
+		return SeqGC(seq), err
 	case "SKEW":
-		return SeqGCSkew(seq)
+		return SeqGCSkew(seq), err
 	case "ENTRO":
-		return SeqEntropy(seq)
-	case kmerRegex.Match(field):
-		// TODO: Compute Kmer profile and distance
+		return SeqEntropy(seq), err
 	default:
+		// Get the k-mer length from field name, compute the
+		// sequence k-mer profile and its distance to the ref profile
+		if kmerRegex.Match([]byte(field)) {
+			k, err := strconv.Atoi(kmerRegex.FindStringSubmatch(field)[1])
+			prof := KmerProfile{k, make(map[string]float64)}
+			return prof.KmerDist(ref[k]), err
+		}
 		fmt.Printf("Error: Invalid metric: %s.\n", field)
 		os.Exit(-1)
 	}
-
+	return 0.0, err
 }
