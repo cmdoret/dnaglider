@@ -78,7 +78,6 @@ func Run() (err error) {
 	flag.Parse()
 	metrics, kmerLengths := parseFields(*fields, *kmers)
 	runtime.GOMAXPROCS(*threads)
-	//*fasta = "./tests/genome.fa" // DEBUG
 	// For each requested kmer length, get the reference profile
 	for _, k := range kmerLengths {
 		refProfile[k] = pkg.FastaToKmers(*fasta, k)

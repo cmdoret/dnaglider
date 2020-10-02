@@ -26,12 +26,13 @@ func SeqGCSkew(seq *seq.Seq) float64 {
 // of a DNA sequence.
 func SeqEntropy(seq *seq.Seq) float64 {
 	var prob, entro float64
-	seqLen := len(seq.Seq)
-	for _, letter := range seq.Alphabet.Letters() {
-		prob = seq.BaseContent(string(letter)) / float64(seqLen)
-		entro -= prob * math.Log2(prob)
+	for _, letter := range []string{"A", "C", "T", "G"} {
+		prob = seq.BaseContent(letter)
+		if prob > 0 {
+			entro += (prob * math.Log2(prob))
+		}
 	}
-	return entro
+	return -entro
 }
 
 // SelectFieldStat will run a function to compute a metric on input sequence
