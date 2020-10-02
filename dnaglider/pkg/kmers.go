@@ -15,6 +15,11 @@ type KmerProfile struct {
 	Profile map[string]float64
 }
 
+// NewKmerProfile is a helper function to generate an empty Kmer profile
+func NewKmerProfile(k int) KmerProfile {
+	return KmerProfile{k, map[string]float64{}}
+}
+
 // GetSeqKmers compute the k-mer profile of a sequence and increments counts
 // in the KmerProfile accordingly
 func (p *KmerProfile) GetSeqKmers(seq *seq.Seq) {
