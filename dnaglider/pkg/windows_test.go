@@ -38,7 +38,7 @@ func TestConsumeChunks(t *testing.T) {
 	ref := make(map[int]KmerProfile)
 	ref[3] = FastaToKmers(TESTFILE, 3)
 	chunks := ChunkGenome(records, WINSIZE, CHUNKSIZE)
-	expHeader := []string{"chrom", "start", "end", "GC", "GCSKEW", "ENTRO"}
+	expHeader := []string{"chrom", "start", "end", "GC", "GCSKEW", "ENTRO", "3MER"}
 	results := ConsumeChunks(chunks, []string{"GC", "GCSKEW", "ENTRO"}, ref)
 	for res := range results {
 		for i := range res.Header {

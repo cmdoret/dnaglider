@@ -66,7 +66,9 @@ func SelectFieldStat(field string, seq *seq.Seq, ref map[int]KmerProfile) (float
 		// sequence k-mer profile and its distance to the ref profile
 		if kmerRegex.Match([]byte(field)) {
 			k, err := strconv.Atoi(kmerRegex.FindStringSubmatch(field)[1])
-			prof := KmerProfile{k, make(map[string]float64)}
+			prof := NewKmerProfile(k)
+			prof.GetSeqKmers(seq)
+			prof.CountsToFreqs()
 			return prof.KmerDist(ref[k]), err
 		}
 		err = fmt.Errorf("Invalid metric: %s", field)

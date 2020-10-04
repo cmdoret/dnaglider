@@ -74,12 +74,12 @@ func Run() (err error) {
 	var outf io.Writer
 	var chunkSize int
 	// We'll store the reference profile for each k-mer length
-	var refProfile map[int]pkg.KmerProfile
 	var kmerLengths []int
 	flag.Parse()
 	metrics, kmerLengths := parseFields(*fields, *kmers)
 	runtime.GOMAXPROCS(*threads)
 	// For each requested kmer length, get the reference profile
+	refProfile := make(map[int]pkg.KmerProfile, len(kmerLengths))
 	for _, k := range kmerLengths {
 		refProfile[k] = pkg.FastaToKmers(*fasta, k)
 	}
