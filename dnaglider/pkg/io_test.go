@@ -4,10 +4,11 @@ import (
 	"testing"
 )
 
+var TESTFILE string = "../../tests/genome.fa"
+
 func TestStreamGenome(t *testing.T) {
 	var nRecords int
-	testFile := "../tests/genome.fa"
-	records := StreamGenome(testFile, 3)
+	records := StreamGenome(TESTFILE, 3)
 	for rec := range records {
 		nRecords++
 		if len(rec.Seq.Seq) != 1200 {

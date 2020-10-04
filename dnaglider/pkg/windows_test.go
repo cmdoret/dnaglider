@@ -14,7 +14,7 @@ var (
 func TestChunkGenome(t *testing.T) {
 	var pos, nChunks int
 	var prevID string
-	records := StreamGenome("../tests/genome.fa", 1)
+	records := StreamGenome(TESTFILE, 1)
 	chunks := ChunkGenome(records, WINSIZE, CHUNKSIZE)
 	for chunk := range chunks {
 		nChunks++
@@ -34,9 +34,9 @@ func TestChunkGenome(t *testing.T) {
 
 }
 func TestConsumeChunks(t *testing.T) {
-	records := StreamGenome("../tests/genome.fa", 1)
+	records := StreamGenome(TESTFILE, 1)
 	ref := make(map[int]KmerProfile)
-	ref[3] = FastaToKmers("../tests/genome.fa", 3)
+	ref[3] = FastaToKmers(TESTFILE, 3)
 	chunks := ChunkGenome(records, WINSIZE, CHUNKSIZE)
 	expHeader := []string{"chrom", "start", "end", "GC", "GCSKEW", "ENTRO"}
 	results := ConsumeChunks(chunks, []string{"GC", "GCSKEW", "ENTRO"}, ref)

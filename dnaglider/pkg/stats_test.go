@@ -7,6 +7,8 @@ import (
 	"github.com/shenwei356/bio/seq"
 )
 
+// TODO: Add test cases with ambiguous or invalid bases
+
 func TestSeqGC(t *testing.T) {
 	gcExamples := map[string]float64{"AAAAAA": 0.0, "AAAC": 0.25, "CAAG": 0.5, "GCGC": 1.0}
 	for exSeq, expGC := range gcExamples {
