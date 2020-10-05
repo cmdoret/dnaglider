@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/csv"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/cmdoret/dnaglider/dnaglider/pkg"
 )
+
 
 // Command-line flags.
 var (
@@ -37,7 +39,7 @@ var (
 			"has an effect if KMER is specified in -fields.",
 	)
 	winSize = flag.Int("window", 100, "Size of the sliding window.")
-	version = flag.String("version", "0.0.0", "Version")
+	version = flag.Bool("version", false, "Version")
 )
 
 // Given a string of comma-separated field names, and a string of
@@ -69,13 +71,17 @@ func parseFields(fieldString string, kmerString string) ([]string, []int) {
 }
 
 // Run reads input genome, chunk it, compute statistics in sliding
-// windows and report them
-func Run() (err error) {
+// windows and report them. It takes the software version as input.
+func Run(semVer string) (err error) {
 	var outf io.Writer
 	var chunkSize int
 	// We'll store the reference profile for each k-mer length
 	var kmerLengths []int
 	flag.Parse()
+	if *version == true {
+		fmt.Println(semVer)
+		os.Exit(0)
+	}
 	metrics, kmerLengths := parseFields(*fields, *kmers)
 	runtime.GOMAXPROCS(*threads)
 	// For each requested kmer length, get the reference profile
