@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-var TESTFILE string = "../../tests/genome.fa"
+var TESTFILE string = "../../test_data/genome.fa"
 
 func TestStreamGenome(t *testing.T) {
 	var nRecords int
