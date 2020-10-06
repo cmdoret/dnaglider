@@ -30,10 +30,7 @@ jobs:
             ghr -t "${GITHUB_TOKEN}" -u "${CIRCLE_PROJECT_USERNAME}" -r "${CIRCLE_PROJECT_REPONAME}" -c "${CIRCLE_SHA1}" -delete "${VERSION}" ./build/
 workflows:
   version: 2
-  untagged-build:
-    jobs:
-      - test
-  tagged-build:
+  test-build-deploy:
     jobs:
       - test
       - build
@@ -41,6 +38,8 @@ workflows:
           filters:
             branches:
               only: release
+            tags:
+              only: /^v.*/
           requires:
             - build
             - test
