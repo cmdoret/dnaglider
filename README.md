@@ -12,7 +12,7 @@ If [go is installed](https://golang.org/doc/install) on the machine, the program
 go get -u github.com/cmdoret/dnaglider/dnaglider
 ```
 
-Otherwise, binaries can be downloaded from the github repository.
+Otherwise, binaries can be downloaded from the github repository's [releases page](https://github.com/cmdoret/dnaglider/releases).
 
 ### Usage:
 
