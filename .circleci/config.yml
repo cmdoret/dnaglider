@@ -35,12 +35,13 @@ workflows:
       - test
   tagged-build:
     jobs:
-      - build
       - test
       - publish-github-release:
           requires:
             - build
             - test
           filters:
+            tags:
+              only: /^v.*/
             branches:
               only: master
