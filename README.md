@@ -1,6 +1,6 @@
 ## dnaglider
 
-[![dnaglider](https://circleci.com/gh/cmdoret/dnaglider/tree/master.svg?style=svg)](https://circleci.com/gh/cmdoret/dnaglider/tree/master)
+[![dnaglider](https://circleci.com/gh/cmdoret/dnaglider/tree/master.svg?style=svg)](https://circleci.com/gh/cmdoret/dnaglider/tree/master) [![Go Report Card](https://goreportcard.com/badge/github.com/cmdoret/dnaglider)](https://goreportcard.com/report/github.com/cmdoret/dnaglider)
 
 Command line utility to compute sliding window genome statistics from a fasta file.
 
