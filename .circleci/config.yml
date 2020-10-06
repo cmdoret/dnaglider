@@ -5,7 +5,7 @@ jobs:
       - image: circleci/golang:1.12
     steps:
       - checkout
-      - run: make release VERSION=${CIRCLE_TAG}
+      - run: make release VERSION=$(git describe)
       - persist_to_workspace:
           root: .
           paths:
@@ -38,8 +38,6 @@ workflows:
           filters:
             branches:
               only: release
-            tags:
-              only: /^v.*/
           requires:
             - build
             - test
