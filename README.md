@@ -1,5 +1,7 @@
 ## dnaglider
 
+[![dnaglider](https://circleci.com/gh/cmdoret/dnaglider/tree/master.svg?style=svg)](https://circleci.com/gh/cmdoret/dnaglider/tree/master)
+
 Command line utility to compute sliding window genome statistics from a fasta file.
 
 ### Installation:
