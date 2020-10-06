@@ -39,8 +39,8 @@ workflows:
       - build
       - publish-github-release:
           filters:
-            tags:
-              only: /^v.*/
+            branches:
+              only: release
           requires:
             - build
             - test
