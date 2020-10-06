@@ -1,0 +1,46 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.12
+    steps:
+      - checkout
+      - run: make release VERSION=${CIRCLE_TAG}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - build
+
+  test:
+    docker:
+      - image: circleci/golang:1.12
+    steps:
+      - checkout
+      - run: make test
+
+  publish-github-release:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          command: |
+            VERSION=$( ./build/dnaglider-linux -version )
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./build/
+workflows:
+  version: 2
+  untagged-build:
+    jobs:
+      - test
+  tagged-build:
+    jobs:
+      - build
+      - test
+      - publish-github-release:
+          requires:
+            - build
+            - test
+          filters:
+            branches:
+              only: master
