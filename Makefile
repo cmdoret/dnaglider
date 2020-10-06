@@ -1,6 +1,6 @@
 
 GOFILES = $(shell find . -name '*.go')
-VERSION="0.0.0"
+VERSION="0.0.1"
 
 default: release 
 
