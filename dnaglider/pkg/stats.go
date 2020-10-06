@@ -9,6 +9,8 @@ import (
 	"github.com/shenwei356/bio/seq"
 )
 
+var kmerRegex = regexp.MustCompile("([0-9]+)MER")
+
 // SeqGC computes the fraction of G or C bases in a sequence (GC content).
 func SeqGC(seq *seq.Seq) float64 {
 	return seq.GC()
@@ -51,7 +53,6 @@ func SeqEntropy(seq *seq.Seq) float64 {
 // the metric is selected according to the input field name.
 func SelectFieldStat(field string, seq *seq.Seq, ref map[int]KmerProfile) (float64, error) {
 	var err error
-	kmerRegex := regexp.MustCompile("([0-9]+)MER")
 	switch field {
 	case "GC":
 		return SeqGC(seq), err
