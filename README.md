@@ -7,7 +7,7 @@ Command line utility to compute sliding window genome statistics from a fasta fi
 If [go is installed](https://golang.org/doc/install) on the machine, the program can be built from source using: 
 
 ```bash
-go install github.com/cmdoret/dnaglider/dnaglider
+go get -u github.com/cmdoret/dnaglider/dnaglider
 ```
 
 Otherwise, binaries can be downloaded from the github repository.
