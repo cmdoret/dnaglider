@@ -17,6 +17,7 @@ type Chunk struct {
 	BpStart int
 	BpEnd   int
 	wSize   int
+	wStride int
 	Seq     *seq.Seq
 	Starts  []int
 }
@@ -59,9 +60,9 @@ func Build2dSlice(rows int, cols int) [][]string {
 
 // ChunkGenome receives fastx.Record from a channel and produces a channel of record
 // chunks. Each chunk contains multiple windows. The chunkSize is given in number of
-// windows, and the windows size is in basepair
-func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan Chunk {
-	chunkLen := chunkSize * winSize
+// windows the windows size and stride are in basepair.
+func ChunkGenome(records <-chan fastx.Record, winSize int, winStride int, chunkSize int) <-chan Chunk {
+	chunkLen := winSize + (chunkSize-1)*winStride
 	chunks := make(chan Chunk, 5)
 	var bpStart, bpEnd, seqLen int
 	go func() {
@@ -69,17 +70,23 @@ func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan
 			seqLen = len(rec.Seq.Seq)
 			bpEnd = 0
 			bpStart = 1
-			for bpEnd < seqLen {
+			// We do not compute truncated windows (stopping before
+			// the end of chromosomes)
+			for bpStart < (seqLen - winSize) {
 				bpEnd = MinInt(bpStart+chunkLen-1, seqLen)
 				chunk := Chunk{
 					ID:      rec.ID,
 					BpStart: bpStart,
 					BpEnd:   bpEnd,
-					Starts:  MakeRange(0, bpEnd-bpStart, winSize),
+					Starts:  MakeRange(0, bpEnd-bpStart-(winSize-1), winStride),
 					wSize:   winSize,
+					wStride: winStride,
 					Seq:     rec.Seq.SubSeq(bpStart, bpEnd),
 				}
 
+				if len(chunk.Starts) == 0 {
+					fmt.Println("empty chunk")
+				}
 				chunks <- chunk
 				bpStart = bpEnd + 1
 			}
@@ -97,7 +104,7 @@ func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]Kme
 	var err error
 	out := make(chan ChunkResult, 5)
 	// There are 3 columns for coordinates (chrom start end), and 1 per feature
-	nFeatures := 3 + len(refProfile) + len(metrics)
+	nFeatures := 3 + len(metrics)
 	// Generate column names
 	header := []string{"chrom", "start", "end"}
 	header = append(header, metrics...)

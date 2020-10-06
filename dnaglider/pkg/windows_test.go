@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 )
@@ -9,18 +8,29 @@ import (
 var (
 	CHUNKSIZE int = 10
 	WINSIZE   int = 5
+	WINSTRIDE int = 2
 )
 
 func TestChunkGenome(t *testing.T) {
 	var pos, nChunks int
 	var prevID string
 	records := StreamGenome(TESTFILE, 1)
-	chunks := ChunkGenome(records, WINSIZE, CHUNKSIZE)
+	chunks := ChunkGenome(records, WINSIZE, WINSTRIDE, CHUNKSIZE)
 	for chunk := range chunks {
 		nChunks++
-		if len(chunk.Seq.Seq) != 50 {
-			fmt.Println(len(chunk.Seq.Seq))
-			t.Errorf("Sequence length of chunk is not wsize * chunksize")
+		obsLen := len(chunk.Seq.Seq)
+		expLen := WINSIZE + (CHUNKSIZE-1)*WINSTRIDE
+		// Check if chunk length is wrong (except if it's the end
+		// of chromosome == 1200 on test data)
+		if obsLen != expLen && chunk.BpEnd != 1200 {
+			t.Errorf(
+				"Sequence length of chunk is incorrect: got %d instead of %d",
+				obsLen,
+				expLen,
+			)
+		}
+		if len(chunk.Starts) == 0 {
+			t.Errorf("There is chunk without any window.")
 		}
 		if string(chunk.ID) == prevID {
 			if pos != chunk.BpStart {
@@ -31,13 +41,12 @@ func TestChunkGenome(t *testing.T) {
 			pos = 0
 		}
 	}
-
 }
 func TestConsumeChunks(t *testing.T) {
 	records := StreamGenome(TESTFILE, 1)
 	ref := make(map[int]KmerProfile)
 	ref[3] = FastaToKmers(TESTFILE, 3)
-	chunks := ChunkGenome(records, WINSIZE, CHUNKSIZE)
+	chunks := ChunkGenome(records, WINSIZE, WINSTRIDE, CHUNKSIZE)
 	expHeader := []string{"chrom", "start", "end", "GC", "GCSKEW", "ENTRO", "3MER"}
 	results := ConsumeChunks(chunks, []string{"GC", "GCSKEW", "ENTRO"}, ref)
 	for res := range results {
