@@ -38,11 +38,9 @@ workflows:
       - test
       - build
       - publish-github-release:
-          requires:
-            - build
-            - test
           filters:
             tags:
               only: /^v.*/
-            branches:
-              only: master
+          requires:
+            - build
+            - test
