@@ -62,7 +62,7 @@ func Build2dSlice(rows int, cols int) [][]string {
 // windows, and the windows size is in basepair
 func ChunkGenome(records <-chan fastx.Record, winSize int, chunkSize int) <-chan Chunk {
 	chunkLen := chunkSize * winSize
-	chunks := make(chan Chunk, 3)
+	chunks := make(chan Chunk, 5)
 	var bpStart, bpEnd, seqLen int
 	go func() {
 		for rec := range records {
@@ -95,7 +95,7 @@ func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]Kme
 	var end int
 	var stat float64
 	var err error
-	out := make(chan ChunkResult)
+	out := make(chan ChunkResult, 5)
 	// There are 3 columns for coordinates (chrom start end), and 1 per feature
 	nFeatures := 3 + len(refProfile) + len(metrics)
 	// Generate column names

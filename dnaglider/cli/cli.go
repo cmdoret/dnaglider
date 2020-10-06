@@ -14,7 +14,6 @@ import (
 	"github.com/cmdoret/dnaglider/dnaglider/pkg"
 )
 
-
 // Command-line flags.
 var (
 	fasta   = flag.String("fasta", "-", "Input genome. '-' reads from stdin.")
@@ -78,6 +77,10 @@ func Run(semVer string) (err error) {
 	// We'll store the reference profile for each k-mer length
 	var kmerLengths []int
 	flag.Parse()
+	// pprof.StartCPUProfile(os.Stderr)
+	// defer pprof.StopCPUProfile()
+	// trace.Start(os.Stderr)
+	// defer trace.Stop()
 	if *version == true {
 		fmt.Println(semVer)
 		os.Exit(0)
@@ -90,7 +93,7 @@ func Run(semVer string) (err error) {
 		refProfile[k] = pkg.FastaToKmers(*fasta, k)
 	}
 	chunkSize = 1000
-	genome := pkg.StreamGenome(*fasta, 3)
+	genome := pkg.StreamGenome(*fasta, 2)
 	chunks := pkg.ChunkGenome(genome, *winSize, chunkSize)
 	results := pkg.ConsumeChunks(chunks, metrics, refProfile)
 	// Format each chunk's results into CSV and sends it to an io.writer.
