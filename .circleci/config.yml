@@ -17,6 +17,7 @@ jobs:
     steps:
       - checkout
       - run: make test
+      - run: bash <(curl -s https://codecov.io/bash)
 
   publish-github-release:
     docker:

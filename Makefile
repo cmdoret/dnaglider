@@ -25,4 +25,4 @@ release: build/dnaglider-linux build/dnaglider-windows.exe build/dnaglider-osx
 
 .PHONY: test
 test: deps
-	cd dnaglider/pkg ; go test
+	cd dnaglider/pkg ; go test -race -coverprofile=../../coverage.txt -covermode=atomic
