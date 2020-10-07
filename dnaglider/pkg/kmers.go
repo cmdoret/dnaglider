@@ -1,9 +1,7 @@
 package pkg
 
 import (
-	"log"
 	"math"
-	"os"
 
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/unikmer"
@@ -30,12 +28,10 @@ func (p *KmerProfile) GetSeqKmers(seq *seq.Seq) {
 
 	// Count canonical k-mers for a linear sequence
 	iter, err = unikmer.NewKmerIterator(seq, p.K, true, false)
+	checkError(err)
 	for {
 		code, ok, err = iter.NextKmer()
-		if err != nil {
-			log.Fatal(err)
-			os.Exit(-1)
-		}
+		checkError(err)
 		if !ok {
 			break
 		}

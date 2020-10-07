@@ -2,10 +2,10 @@ package cli
 
 import (
 	"encoding/csv"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -57,8 +57,8 @@ func parseFields(fieldString string, kmerString string) ([]string, []int) {
 			for _, k := range kmers {
 				kInt, err := strconv.Atoi(k)
 				if err != nil {
-					log.Fatal(err)
-					os.Exit(-1)
+					fmt.Fprintln(os.Stderr, err)
+					os.Exit(1)
 				}
 				outLengths = append(outLengths, kInt)
 				outFields = append(outFields, k+"MER")
@@ -103,7 +103,7 @@ func Run(semVer string) (err error) {
 	} else {
 		outf, err = os.Create(*out)
 		if err != nil {
-			log.Fatal("Error opening output file: ", err)
+			return errors.New("Error opening output file.")
 		}
 	}
 	w := csv.NewWriter(outf)
@@ -114,7 +114,7 @@ func Run(semVer string) (err error) {
 	for res := range results {
 		w.WriteAll(res.Data)
 		if err := w.Error(); err != nil {
-			log.Fatal("Error writing csv: ", err)
+			return errors.New("Error writing csv.")
 		}
 	}
 	return nil

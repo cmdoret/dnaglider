@@ -2,8 +2,6 @@ package pkg
 
 import (
 	"io"
-	"log"
-	"os"
 
 	"github.com/shenwei356/bio/seqio/fastx"
 )
@@ -15,10 +13,7 @@ func StreamGenome(fasta string, bufSize int) <-chan fastx.Record {
 	recordChan := make(chan fastx.Record, bufSize)
 	reader, err := fastx.NewDefaultReader(fasta)
 	// Can't read input path
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(-1)
-	}
+	checkError(err)
 	// Read records asynchronously and send them to a channel
 	go func() {
 		for {
@@ -29,7 +24,7 @@ func StreamGenome(fasta string, bufSize int) <-chan fastx.Record {
 					close(recordChan)
 					return
 				}
-				log.Fatal(err)
+				checkError(err)
 				break
 			}
 			recordChan <- *record.Clone()
@@ -46,17 +41,14 @@ func FastaToKmers(fasta string, k int) KmerProfile {
 	var record *fastx.Record
 	var profile = KmerProfile{k, make(map[string]float64)}
 	reader, err := fastx.NewDefaultReader(fasta)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(-1)
-	}
+	checkError(err)
 	for {
 		record, err = reader.Read()
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			log.Fatal(err)
+			checkError(err)
 			break
 		}
 		// Add K-mer counts for each record

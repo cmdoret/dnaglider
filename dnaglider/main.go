@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/cmdoret/dnaglider/dnaglider/cli"
 )
@@ -11,6 +12,6 @@ var VERSION string
 
 func main() {
 	if err := cli.Run(VERSION); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 	}
 }

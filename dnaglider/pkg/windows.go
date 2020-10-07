@@ -2,8 +2,6 @@ package pkg
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
@@ -121,10 +119,7 @@ func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]Kme
 				winSeq := chunk.Seq.SubSeq(start+1, start+chunk.wSize)
 				for colNum, metric := range header[3:] {
 					stat, err = SelectFieldStat(metric, winSeq, refProfile)
-					if err != nil {
-						log.Fatal(err)
-						os.Exit(-1)
-					}
+					checkError(err)
 					results.Data[winID][colNum+3] = fmt.Sprintf("%f", stat)
 				}
 			}
