@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/shenwei356/bio/seq"
+	"github.com/shenwei356/unikmer"
 )
 
 func TestNewKmerProfile(t *testing.T) {
@@ -16,7 +17,9 @@ func TestGetSeqKmers(t *testing.T) {
 	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CCTA"))
 	obsProf := NewKmerProfile(3)
 	obsProf.GetSeqKmers(testSeq)
-	expProf := map[string]float64{"AGG": 1.0, "CTA": 1.0}
+	k1, _ := unikmer.Encode([]byte("AGG"))
+	k2, _ := unikmer.Encode([]byte("CTA"))
+	expProf := map[uint64]float64{k1: 1.0, k2: 1.0}
 	if len(obsProf.Profile) != len(expProf) {
 		t.Errorf(
 			"Number of kmers in profile incorrect: got %d instead of %d",
@@ -28,7 +31,7 @@ func TestGetSeqKmers(t *testing.T) {
 		if obsProf.Profile[kmer] != count {
 			t.Errorf(
 				"Wrong count for kmer %s: got %f instead of %f",
-				kmer,
+				unikmer.Decode(kmer, obsProf.K),
 				obsProf.Profile[kmer],
 				count,
 			)
@@ -40,12 +43,14 @@ func TestCountsToFreqs(t *testing.T) {
 	obsProf := NewKmerProfile(3)
 	obsProf.GetSeqKmers(testSeq)
 	obsProf.CountsToFreqs()
-	expProf := map[string]float64{"AGG": 0.5, "CTA": 0.5}
+	k1, _ := unikmer.Encode([]byte("AGG"))
+	k2, _ := unikmer.Encode([]byte("CTA"))
+	expProf := map[uint64]float64{k1: 0.5, k2: 0.5}
 	for kmer, count := range expProf {
 		if obsProf.Profile[kmer] != count {
 			t.Errorf(
 				"Wrong frequency for kmer %s: got %f instead of %f",
-				kmer,
+				unikmer.Decode(kmer, obsProf.K),
 				obsProf.Profile[kmer],
 				count,
 			)

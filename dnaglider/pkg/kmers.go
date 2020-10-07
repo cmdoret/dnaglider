@@ -10,12 +10,12 @@ import (
 // KmerProfile stores kmers and their frequencies for a given kmer length
 type KmerProfile struct {
 	K       int
-	Profile map[string]float64
+	Profile map[uint64]float64
 }
 
 // NewKmerProfile is a helper function to generate an empty Kmer profile
 func NewKmerProfile(k int) KmerProfile {
-	return KmerProfile{k, make(map[string]float64)}
+	return KmerProfile{k, make(map[uint64]float64)}
 }
 
 // GetSeqKmers compute the k-mer profile of a sequence and increments counts
@@ -35,7 +35,7 @@ func (p *KmerProfile) GetSeqKmers(seq *seq.Seq) {
 		if !ok {
 			break
 		}
-		p.Profile[string(unikmer.Decode(code, p.K))]++
+		p.Profile[code]++
 	}
 }
 
