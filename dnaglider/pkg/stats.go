@@ -10,6 +10,14 @@ import (
 )
 
 var kmerRegex = regexp.MustCompile("([0-9]+)MER")
+var fieldDispatcher = func() map[string]func(seq *seq.Seq) float64 {
+	fd := make(map[string]func(seq *seq.Seq) float64)
+	fd["GC"] = SeqGC
+	fd["GCSKEW"] = SeqGCSkew
+	fd["ATSKEW"] = SeqATSkew
+	fd["ENTRO"] = SeqEntropy
+	return fd
+}
 
 // SeqGC computes the fraction of G or C bases in a sequence (GC content).
 func SeqGC(seq *seq.Seq) float64 {
