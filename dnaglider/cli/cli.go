@@ -94,7 +94,7 @@ func Run(semVer string) (err error) {
 		refProfile[k] = pkg.FastaToKmers(*fasta, k)
 	}
 	chunkSize = 1000
-	genome := pkg.StreamGenome(*fasta, 2)
+	genome := pkg.StreamGenome(*fasta, 1)
 	chunks := pkg.ChunkGenome(genome, *winSize, *winStride, chunkSize)
 	results := pkg.ConsumeChunks(chunks, metrics, refProfile)
 	// Format each chunk's results into CSV and sends it to an io.writer.
