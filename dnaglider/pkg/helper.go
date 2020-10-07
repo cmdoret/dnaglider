@@ -7,7 +7,7 @@ import (
 	"regexp"
 )
 
-var fieldRegex = regexp.MustCompile("(GC|GCSKEW|ATSKEW|ENTRO|[0-9K]MER|)")
+var fieldRegex = regexp.MustCompile("^(GC|GCSKEW|ATSKEW|ENTRO|[0-9]+MER)$")
 
 func checkError(err error) {
 	if err != nil {
@@ -21,6 +21,7 @@ func checkFields(fields []string) error {
 	for _, field := range fields {
 		if !fieldRegex.Match([]byte(field)) {
 			err = errors.New("Invalid field name")
+			return err
 		}
 	}
 	return err
