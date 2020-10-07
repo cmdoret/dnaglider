@@ -49,7 +49,7 @@ func TestConsumeChunks(t *testing.T) {
 	chunks := ChunkGenome(records, WINSIZE, WINSTRIDE, CHUNKSIZE)
 	expHeader := []string{"chrom", "start", "end", "GC", "GCSKEW", "ENTRO", "3MER"}
 
-	for res := range ConsumeChunks(chunks, []string{"GC", "GCSKEW", "ENTRO"}, ref) {
+	for res := range ConsumeChunks(chunks, []string{"GC", "GCSKEW", "ENTRO", "3MER"}, ref) {
 		for i := range res.Header {
 			if res.Header[i] != expHeader[i] {
 				t.Errorf("Result header is incorrect.: %s", res.Header)

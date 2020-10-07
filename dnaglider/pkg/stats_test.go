@@ -66,3 +66,23 @@ func TestSeqEntropy(t *testing.T) {
 	}
 
 }
+
+func TestSeqKmerDiv(t *testing.T) {
+	refSeq, _ := seq.NewSeq(seq.DNA, []byte("AAATAA"))
+	querySeq, _ := seq.NewSeq(seq.DNA, []byte("AAA"))
+
+	refProf := NewKmerProfile(3)
+	refProf.GetSeqKmers(refSeq)
+	refProf.CountsToFreqs()
+	// ref:  AAA, AAT, ATA, TAA
+	// prof: AAA
+	expDist := math.Sqrt(0.75*0.75 + 3*(0.25*0.25))
+	obsDist := SeqKmerDiv(querySeq, refProf)
+	if expDist != obsDist {
+		t.Errorf(
+			"Wrong kmer distance with reference: got %f instead of %f",
+			obsDist,
+			expDist,
+		)
+	}
+}

@@ -86,9 +86,6 @@ func ChunkGenome(records <-chan fastx.Record, winSize int, winStride int, chunkS
 					Seq:     rec.Seq.SubSeq(bpStart, bpEnd),
 				}
 
-				if len(chunk.Starts) == 0 {
-					fmt.Println("empty chunk")
-				}
 				chunks <- chunk
 				bpStart = bpEnd + 1
 			}

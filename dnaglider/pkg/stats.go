@@ -53,7 +53,7 @@ func SeqEntropy(seq *seq.Seq) float64 {
 	return -entro
 }
 
-// SeqKmer will compute the Kmer profile of the input profile
+// SeqKmerDiv will compute the Kmer profile of the input profile
 // and compute its distance to a reference k-mer profile.
 func SeqKmerDiv(seq *seq.Seq, ref KmerProfile) float64 {
 	// Get the k-mer length from field name, compute the

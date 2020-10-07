@@ -55,6 +55,9 @@ func (p *KmerProfile) CountsToFreqs() {
 func (p *KmerProfile) KmerDist(ref KmerProfile) float64 {
 	var dist float64
 	for kmer, freq := range ref.Profile {
+		// This works because etching missing k-mer
+		// returns zero value for float
+
 		dist += math.Pow(freq-p.Profile[kmer], 2.0)
 	}
 	dist = math.Sqrt(dist)
