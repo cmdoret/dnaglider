@@ -2,10 +2,14 @@ package pkg
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/shenwei356/bio/seq"
 	"github.com/shenwei356/bio/seqio/fastx"
 )
+
+var kmerRegex = regexp.MustCompile("([0-9]+)MER")
 
 // Chunk is a piece of fastx.Record sequence, containing the associated
 // id genomic coordinate. It also contains indices of sliding windows
@@ -99,14 +103,26 @@ func ChunkGenome(records <-chan fastx.Record, winSize int, winStride int, chunkS
 func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]KmerProfile) chan ChunkResult {
 	var end int
 	var stat float64
-	var err error
 	out := make(chan ChunkResult, 5)
+	// Mapping of {column indices: field} for regular metrics (GC content, skew, ...)
+	metricCols := make(map[int]string)
+	// Mapping of {column indices:  k-mer sizes} for kmer columns
+	kmerCols := make(map[int]int)
 	// There are 3 columns for coordinates (chrom start end), and 1 per feature
 	nFeatures := 3 + len(metrics)
 	// Generate column names
 	header := []string{"chrom", "start", "end"}
 	header = append(header, metrics...)
-
+	// Identifying which columns contain k-mer metrics
+	for idx, field := range metrics {
+		if kmerRegex.Match([]byte(field)) {
+			k, err := strconv.Atoi(kmerRegex.FindStringSubmatch(field)[1])
+			checkError(err)
+			kmerCols[idx+3] = k
+		} else {
+			metricCols[idx+3] = field
+		}
+	}
 	go func() {
 		for chunk := range chunks {
 			nWindows := len(chunk.Starts)
@@ -117,10 +133,15 @@ func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]Kme
 				results.Data[winID][1] = fmt.Sprint(chunk.BpStart + start)
 				results.Data[winID][2] = fmt.Sprint(end)
 				winSeq := chunk.Seq.SubSeq(start+1, start+chunk.wSize)
-				for colNum, metric := range header[3:] {
-					stat, err = SelectFieldStat(metric, winSeq, refProfile)
-					checkError(err)
-					results.Data[winID][colNum+3] = fmt.Sprintf("%f", stat)
+				// Compute standard fields via dispatcher map
+				for colNum, field := range metricCols {
+					stat = fieldDispatcher[field](winSeq)
+					results.Data[winID][colNum] = fmt.Sprintf("%f", stat)
+				}
+				// Compute k-mer fields via dedicated function
+				for colNum, k := range kmerCols {
+					stat = SeqKmerDiv(winSeq, refProfile[k])
+					results.Data[winID][colNum] = fmt.Sprintf("%f", stat)
 				}
 			}
 			out <- results

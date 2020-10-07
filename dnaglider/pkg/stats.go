@@ -1,15 +1,11 @@
 package pkg
 
 import (
-	"fmt"
 	"math"
-	"regexp"
-	"strconv"
 
 	"github.com/shenwei356/bio/seq"
 )
 
-var kmerRegex = regexp.MustCompile("([0-9]+)MER")
 var fieldDispatcher = func() map[string]func(seq *seq.Seq) float64 {
 	fd := make(map[string]func(seq *seq.Seq) float64)
 	fd["GC"] = SeqGC
@@ -17,7 +13,7 @@ var fieldDispatcher = func() map[string]func(seq *seq.Seq) float64 {
 	fd["ATSKEW"] = SeqATSkew
 	fd["ENTRO"] = SeqEntropy
 	return fd
-}
+}()
 
 // SeqGC computes the fraction of G or C bases in a sequence (GC content).
 func SeqGC(seq *seq.Seq) float64 {
@@ -57,30 +53,13 @@ func SeqEntropy(seq *seq.Seq) float64 {
 	return -entro
 }
 
-// SelectFieldStat will run a function to compute a metric on input sequence
-// the metric is selected according to the input field name.
-func SelectFieldStat(field string, seq *seq.Seq, ref map[int]KmerProfile) (float64, error) {
-	var err error
-	switch field {
-	case "GC":
-		return SeqGC(seq), err
-	case "GCSKEW":
-		return SeqGCSkew(seq), err
-	case "ATSKEW":
-		return SeqATSkew(seq), err
-	case "ENTRO":
-		return SeqEntropy(seq), err
-	default:
-		// Get the k-mer length from field name, compute the
-		// sequence k-mer profile and its distance to the ref profile
-		if kmerRegex.Match([]byte(field)) {
-			k, err := strconv.Atoi(kmerRegex.FindStringSubmatch(field)[1])
-			prof := NewKmerProfile(k)
-			prof.GetSeqKmers(seq)
-			prof.CountsToFreqs()
-			return prof.KmerDist(ref[k]), err
-		}
-		err = fmt.Errorf("Invalid metric: %s", field)
-	}
-	return math.NaN(), err
+// SeqKmer will compute the Kmer profile of the input profile
+// and compute its distance to a reference k-mer profile.
+func SeqKmerDiv(seq *seq.Seq, ref KmerProfile) float64 {
+	// Get the k-mer length from field name, compute the
+	// sequence k-mer profile and its distance to the ref profile
+	prof := NewKmerProfile(ref.K)
+	prof.GetSeqKmers(seq)
+	prof.CountsToFreqs()
+	return prof.KmerDist(ref)
 }
