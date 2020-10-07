@@ -43,13 +43,13 @@ func TestChunkGenome(t *testing.T) {
 	}
 }
 func TestConsumeChunks(t *testing.T) {
-	records := StreamGenome(TESTFILE, 1)
 	ref := make(map[int]KmerProfile)
 	ref[3] = FastaToKmers(TESTFILE, 3)
+	records := StreamGenome(TESTFILE, 1)
 	chunks := ChunkGenome(records, WINSIZE, WINSTRIDE, CHUNKSIZE)
 	expHeader := []string{"chrom", "start", "end", "GC", "GCSKEW", "ENTRO", "3MER"}
-	results := ConsumeChunks(chunks, []string{"GC", "GCSKEW", "ENTRO"}, ref)
-	for res := range results {
+
+	for res := range ConsumeChunks(chunks, []string{"GC", "GCSKEW", "ENTRO"}, ref) {
 		for i := range res.Header {
 			if res.Header[i] != expHeader[i] {
 				t.Errorf("Result header is incorrect.: %s", res.Header)
