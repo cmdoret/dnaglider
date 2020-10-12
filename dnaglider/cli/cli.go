@@ -103,7 +103,7 @@ func Run(semVer string) (err error) {
 	} else {
 		outf, err = os.Create(*out)
 		if err != nil {
-			return errors.New("Error opening output file.")
+			return errors.New("error opening output file")
 		}
 	}
 	w := csv.NewWriter(outf)
@@ -114,7 +114,7 @@ func Run(semVer string) (err error) {
 	for res := range results {
 		w.WriteAll(res.Data)
 		if err := w.Error(); err != nil {
-			return errors.New("Error writing csv.")
+			return errors.New("error writing csv")
 		}
 	}
 	return nil
