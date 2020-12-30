@@ -27,6 +27,7 @@ Instead of working with input / output files, the program reads from stdin and w
 ```bash
 some command genome.fa | dnaglider -fields "GC,GCSKEW" | grep "chr10" > gc_stats_chr10.tsv
 ```
+> Note: Streaming genomes through stdin doesn't work when using the KMER field, as computing k-mer divergence requires a 2-pass scan of the genome. When working with k-mers, specify the genome file using `-fasta` instead.
 
 ```
 Usage of dnaglider:
