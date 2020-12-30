@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/shenwei356/bio/seq"
@@ -17,8 +18,11 @@ func TestGetSeqKmers(t *testing.T) {
 	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CCTA"))
 	obsProf := NewKmerProfile(3)
 	obsProf.GetSeqKmers(testSeq)
+	for code, freq := range obsProf.Profile {
+		fmt.Println(string(unikmer.Decode(code, 3)), freq)
+	}
 	k1, _ := unikmer.Encode([]byte("AGG"))
-	k2, _ := unikmer.Encode([]byte("CTA"))
+	k2, _ := unikmer.Encode([]byte("TAG"))
 	expProf := map[uint64]float64{k1: 1.0, k2: 1.0}
 	if len(obsProf.Profile) != len(expProf) {
 		t.Errorf(
@@ -44,7 +48,7 @@ func TestCountsToFreqs(t *testing.T) {
 	obsProf.GetSeqKmers(testSeq)
 	obsProf.CountsToFreqs()
 	k1, _ := unikmer.Encode([]byte("AGG"))
-	k2, _ := unikmer.Encode([]byte("CTA"))
+	k2, _ := unikmer.Encode([]byte("TAG"))
 	expProf := map[uint64]float64{k1: 0.5, k2: 0.5}
 	for kmer, count := range expProf {
 		if obsProf.Profile[kmer] != count {

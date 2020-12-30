@@ -27,7 +27,7 @@ func (p *KmerProfile) GetSeqKmers(seq *seq.Seq) {
 	var code uint64
 
 	// Count canonical k-mers for a linear sequence
-	iter, err = unikmer.NewKmerIterator(seq, p.K, true, false)
+	iter, err = unikmer.NewKmerIterator(seq, p.K, false, false)
 	checkError(err)
 	for {
 		code, ok, err = iter.NextKmer()
