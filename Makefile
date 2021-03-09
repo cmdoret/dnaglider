@@ -1,3 +1,4 @@
+# Recipes for building, testing and releasing dnaglider
 
 GOFILES = $(shell find . -name '*.go')
 VERSION="0.0.4"
