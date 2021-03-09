@@ -20,18 +20,14 @@ func NewKmerProfile(k int) KmerProfile {
 
 // GetSeqKmers compute the k-mer profile of a sequence and increments counts
 // in the KmerProfile accordingly
-func (p *KmerProfile) GetSeqKmers(seq *seq.Seq) {
+func (p *KmerProfile) GetSeqKmers(sq *seq.Seq) {
 	var iter *unikmer.Iterator
-	var err error
 	var ok bool
 	var code uint64
-
 	// Count canonical k-mers for a linear sequence
-	iter, err = unikmer.NewKmerIterator(seq, p.K, false, false)
-	checkError(err)
+	iter, _ = unikmer.NewKmerIterator(sq, p.K, true, false)
 	for {
-		code, ok, err = iter.NextKmer()
-		checkError(err)
+		code, ok, _ = iter.NextKmer()
 		if !ok {
 			break
 		}
@@ -49,17 +45,38 @@ func (p *KmerProfile) CountsToFreqs() {
 	}
 }
 
-// KmerDist computes the euclidean distance between a reference k-mer profile
+// KmerEuclDist computes the euclidean distance between a reference k-mer profile
 // and another profile. The reference is assumed to include all k-mers
 // present in the profile.
-func (p *KmerProfile) KmerDist(ref KmerProfile) float64 {
+func (p *KmerProfile) KmerEuclDist(ref KmerProfile) float64 {
 	var dist float64
 	for kmer, freq := range ref.Profile {
-		// This works because etching missing k-mer
+		// This works because fetching missing k-mer
 		// returns zero value for float
 
 		dist += math.Pow(freq-p.Profile[kmer], 2.0)
 	}
 	dist = math.Sqrt(dist)
+	return dist
+}
+
+// KmerCosDist computes the cosine distance between a reference k-mer profile
+// and another profile. The reference is assumed to include all k-mers
+// present in the profile.
+func (p *KmerProfile) KmerCosDist(ref KmerProfile) float64 {
+	var dist, numerator, denominator, normL, normR float64
+	for kmer, freq := range ref.Profile {
+		// This works because fetching missing k-mer
+		// returns zero value for float
+		numerator += freq * p.Profile[kmer]
+		normL += math.Pow(freq, 2.0)
+		normR += math.Pow(p.Profile[kmer], 2.0)
+	}
+	denominator = math.Sqrt(normL) * math.Sqrt(normR)
+	// Prevent nans
+	if denominator == 0 {
+		denominator = 1
+	}
+	dist = 1 - numerator/denominator
 	return dist
 }

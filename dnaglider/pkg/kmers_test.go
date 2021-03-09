@@ -18,11 +18,8 @@ func TestGetSeqKmers(t *testing.T) {
 	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CCTA"))
 	obsProf := NewKmerProfile(3)
 	obsProf.GetSeqKmers(testSeq)
-	for code, freq := range obsProf.Profile {
-		fmt.Println(string(unikmer.Decode(code, 3)), freq)
-	}
 	k1, _ := unikmer.Encode([]byte("AGG"))
-	k2, _ := unikmer.Encode([]byte("TAG"))
+	k2, _ := unikmer.Encode([]byte("CTA"))
 	expProf := map[uint64]float64{k1: 1.0, k2: 1.0}
 	if len(obsProf.Profile) != len(expProf) {
 		t.Errorf(
@@ -62,7 +59,7 @@ func TestCountsToFreqs(t *testing.T) {
 	}
 
 }
-func TestKmerDist(t *testing.T) {
+func TestKmerEuclDist(t *testing.T) {
 	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CCTA"))
 	testRef, _ := seq.NewSeq(seq.DNA, []byte("CCTAAA"))
 	profSeq := NewKmerProfile(3)
@@ -72,10 +69,38 @@ func TestKmerDist(t *testing.T) {
 	profSeq.CountsToFreqs()
 	profRef.CountsToFreqs()
 	expDist := 0.5
-	obsDist := profSeq.KmerDist(profRef)
+	obsDist := profSeq.KmerEuclDist(profRef)
 	if expDist != obsDist {
 		t.Errorf(
-			"Incorrect distance between kmer profiles:  got %f instead of %f",
+			"Incorrect Euclidean distance between kmer profiles:  got %f instead of %f",
+			obsDist,
+			expDist,
+		)
+	}
+
+}
+
+func TestKmerCosDist(t *testing.T) {
+	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CCTA"))
+	testRef, _ := seq.NewSeq(seq.DNA, []byte("CCTAAA"))
+	profSeq := NewKmerProfile(3)
+	profRef := NewKmerProfile(3)
+	profSeq.GetSeqKmers(testSeq)
+	profRef.GetSeqKmers(testRef)
+	profSeq.CountsToFreqs()
+	profRef.CountsToFreqs()
+	for kmer, freq := range profRef.Profile {
+		fmt.Println(unikmer.Decode(kmer, 3), freq)
+	}
+	fmt.Println("-----")
+	for kmer, freq := range profSeq.Profile {
+		fmt.Println(unikmer.Decode(kmer, 3), freq)
+	}
+	expDist := 0.5
+	obsDist := profSeq.KmerCosDist(profRef)
+	if expDist != obsDist {
+		t.Errorf(
+			"Incorrect cosine distance between kmer profiles:  got %f instead of %f",
 			obsDist,
 			expDist,
 		)

@@ -61,5 +61,5 @@ func SeqKmerDiv(seq *seq.Seq, ref KmerProfile) float64 {
 	prof := NewKmerProfile(ref.K)
 	prof.GetSeqKmers(seq)
 	prof.CountsToFreqs()
-	return prof.KmerDist(ref)
+	return prof.KmerCosDist(ref)
 }
