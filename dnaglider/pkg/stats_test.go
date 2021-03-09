@@ -68,15 +68,13 @@ func TestSeqEntropy(t *testing.T) {
 }
 
 func TestSeqKmerDiv(t *testing.T) {
-	refSeq, _ := seq.NewSeq(seq.DNA, []byte("AAATAA"))
-	querySeq, _ := seq.NewSeq(seq.DNA, []byte("AATA"))
+	refSeq, _ := seq.NewSeq(seq.DNA, []byte("GCGCG"))
+	querySeq, _ := seq.NewSeq(seq.DNA, []byte("AATAA"))
 
 	refProf := NewKmerProfile(3)
 	refProf.GetSeqKmers(refSeq)
 	refProf.CountsToFreqs()
-	// ref:  AAA, AAT, ATA, TAA
-	// prof: AAT, ATA
-	expDist := 0.5
+	expDist := 1.0
 	obsDist := SeqKmerDiv(querySeq, refProf)
 	if expDist != obsDist {
 		t.Errorf(

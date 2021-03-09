@@ -38,8 +38,11 @@ func (p *KmerProfile) GetSeqKmers(sq *seq.Seq) {
 // CountsToFreqs transforms counts in a KmerProfile into frequencies.
 func (p *KmerProfile) CountsToFreqs() {
 	var nKmers float64
+	// Compute total number of k-mers
+	for _, count := range p.Profile {
+		nKmers += count
+	}
 	// Normalize counts to frequencies
-	nKmers = float64(len(p.Profile))
 	for kmer, count := range p.Profile {
 		p.Profile[kmer] = count / nKmers
 	}
@@ -74,9 +77,9 @@ func (p *KmerProfile) KmerCosDist(ref KmerProfile) float64 {
 	}
 	denominator = math.Sqrt(normL) * math.Sqrt(normR)
 	// Prevent nans
-	if denominator == 0 {
-		denominator = 1
+	if denominator == 0.0 {
+		denominator = 1.0
 	}
-	dist = 1 - numerator/denominator
+	dist = 1.0 - numerator/denominator
 	return dist
 }
