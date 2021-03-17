@@ -55,7 +55,7 @@ func TestATSkew(t *testing.T) {
 	}
 }
 func TestSeqEntropy(t *testing.T) {
-	entroExamples := map[string]float64{"CCCC": 0, "ACGT": 2, "ATTA": 1}
+	entroExamples := map[string]float64{"CCCC": 0, "ACGT": 1, "ATTA": 0.5}
 	// Test valid sequences
 	for exSeq, expSkew := range entroExamples {
 		tmpSeq, _ := seq.NewSeq(seq.DNA, []byte(exSeq))

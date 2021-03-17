@@ -41,7 +41,7 @@ func SeqATSkew(seq *seq.Seq) float64 {
 }
 
 // SeqEntropy computes the Shannon entropy (information entropy)
-// of a DNA sequence.
+// of a DNA sequence. The value returned is between 0 and 1.
 func SeqEntropy(seq *seq.Seq) float64 {
 	var prob, entro float64
 	for _, letter := range []string{"A", "C", "T", "G"} {
@@ -50,7 +50,7 @@ func SeqEntropy(seq *seq.Seq) float64 {
 			entro += (prob * math.Log2(prob))
 		}
 	}
-	return -entro
+	return -entro / 2.0
 }
 
 // SeqKmerDiv will compute the Kmer profile of the input profile
