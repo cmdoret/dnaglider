@@ -37,9 +37,10 @@ var (
 			"lengths. Multiple comma separated values can be provided. This only "+
 			"has an effect if KMER is specified in -fields.",
 	)
-	winSize   = flag.Int("window", 100, "Size of the sliding window.")
-	winStride = flag.Int("stride", 100, "Step between windows.")
-	version   = flag.Bool("version", false, "Version")
+	winSize    = flag.Int("window", 100, "Size of the sliding window.")
+	winStride  = flag.Int("stride", 100, "Step between windows.")
+	distMetric = flag.String("metric", "cosine", "Distance metric for k-mers. 'cosine' or 'euclidean'.")
+	version    = flag.Bool("version", false, "Version")
 )
 
 // Given a string of comma-separated field names, and a string of
@@ -96,7 +97,7 @@ func Run(semVer string) (err error) {
 	chunkSize = 1000
 	genome := pkg.StreamGenome(*fasta, 1)
 	chunks := pkg.ChunkGenome(genome, *winSize, *winStride, chunkSize)
-	results := pkg.ConsumeChunks(chunks, metrics, refProfile)
+	results := pkg.ConsumeChunks(chunks, metrics, refProfile, *distMetric)
 	// Format each chunk's results into CSV and sends it to an io.writer.
 	if *out == "-" {
 		outf = os.Stdout

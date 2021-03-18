@@ -97,7 +97,7 @@ func ChunkGenome(records <-chan fastx.Record, winSize int, winStride int, chunkS
 }
 
 // ConsumeChunks computes window-based statistics in chunks and stores them in a ChunkResult struct.
-func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]KmerProfile) chan ChunkResult {
+func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]KmerProfile, distMetric string) chan ChunkResult {
 	var end int
 	var stat float64
 	out := make(chan ChunkResult, 5)
@@ -137,7 +137,7 @@ func ConsumeChunks(chunks <-chan Chunk, metrics []string, refProfile map[int]Kme
 				}
 				// Compute k-mer fields via dedicated function
 				for colNum, k := range kmerCols {
-					stat = SeqKmerDiv(winSeq, refProfile[k])
+					stat = SeqKmerDiv(winSeq, refProfile[k], distMetric)
 					results.Data[winID][colNum] = fmt.Sprintf("%f", stat)
 				}
 			}

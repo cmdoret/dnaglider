@@ -75,7 +75,7 @@ func TestSeqKmerDiv(t *testing.T) {
 	refProf.GetSeqKmers(refSeq)
 	refProf.CountsToFreqs()
 	expDist := 1.0
-	obsDist := SeqKmerDiv(querySeq, refProf)
+	obsDist := SeqKmerDiv(querySeq, refProf, "cosine")
 	if expDist != obsDist {
 		t.Errorf(
 			"Wrong kmer distance with reference: got %f instead of %f",

@@ -55,11 +55,17 @@ func SeqEntropy(seq *seq.Seq) float64 {
 
 // SeqKmerDiv will compute the Kmer profile of the input profile
 // and compute its distance to a reference k-mer profile.
-func SeqKmerDiv(seq *seq.Seq, ref KmerProfile) float64 {
+func SeqKmerDiv(seq *seq.Seq, ref KmerProfile, distMetric string) float64 {
+	var dist float64
 	// Get the k-mer length from field name, compute the
 	// sequence k-mer profile and its distance to the ref profile
 	prof := NewKmerProfile(ref.K)
 	prof.GetSeqKmers(seq)
 	prof.CountsToFreqs()
-	return prof.KmerCosDist(ref)
+	if distMetric == "cosine" {
+		dist = prof.KmerCosDist(ref)
+	} else {
+		dist = prof.KmerEuclDist(ref)
+	}
+	return dist
 }
