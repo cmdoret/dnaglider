@@ -28,7 +28,7 @@ var (
 			"\tGCSKEW: G/C skew (-1 to 1)\n"+
 			"\tATSKEW: A/T skew (-1 to 1)\n"+
 			"\tENTRO: Information entropy of the sequence (0 to 1)\n"+
-			"\tKMER: K-mer divergence from the reference (euclidean distance)\n",
+			"\tKMER: K-mer divergence from the reference (cosine distance)\n",
 	)
 	kmers = flag.String(
 		"kmers",

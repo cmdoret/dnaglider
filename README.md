@@ -40,7 +40,7 @@ Usage of dnaglider:
                 GCSKEW: G/C skew (-1 to 1)
                 ATSKEW: A/T skew (-1 to 1)
                 ENTRO: Information entropy of the sequence (0 to 1)
-                KMER: K-mer divergence from the reference (euclidean distance)
+                KMER: K-mer divergence from the reference (cosine distance)
          (default "GC")
   -kmers string
         Report k-mer divergence from the genome for the following k-mer lengths. Multiple comma separated values can be provided. This only has an effect if KMER is specified in -fields. (default "4")
