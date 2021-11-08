@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/shenwei356/bio/seq"
-	"github.com/shenwei356/unikmer"
+	"github.com/shenwei356/bio/sketches"
 )
 
 // KmerProfile stores kmers and their frequencies for a given kmer length
@@ -21,11 +21,11 @@ func NewKmerProfile(k int) KmerProfile {
 // GetSeqKmers compute the k-mer profile of a sequence and increments counts
 // in the KmerProfile accordingly
 func (p *KmerProfile) GetSeqKmers(sq *seq.Seq) {
-	var iter *unikmer.Iterator
+	var iter *sketches.Iterator
 	var ok bool
 	var code uint64
 	// Count canonical k-mers for a linear sequence
-	iter, _ = unikmer.NewKmerIterator(sq, p.K, true, false)
+	iter, _ = sketches.NewKmerIterator(sq, p.K, true, false)
 	for {
 		code, ok, _ = iter.NextKmer()
 		if !ok {

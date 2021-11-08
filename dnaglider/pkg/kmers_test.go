@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/shenwei356/bio/seq"
-	"github.com/shenwei356/unikmer"
+	"github.com/shenwei356/kmers"
 )
 
 func TestNewKmerProfile(t *testing.T) {
@@ -16,14 +16,14 @@ func TestNewKmerProfile(t *testing.T) {
 	}
 }
 func TestGetSeqKmers(t *testing.T) {
-	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CCTAAA"))
+	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CTAA"))
 	obsProf := NewKmerProfile(3)
 	obsProf.GetSeqKmers(testSeq)
 	for code, freq := range obsProf.Profile {
-		fmt.Println(string(unikmer.Decode(code, 3)), freq)
+		fmt.Println(string(kmers.Decode(code, 3)), freq)
 	}
-	k1, _ := unikmer.Encode([]byte("AGG"))
-	k2, _ := unikmer.Encode([]byte("CTA"))
+	k1, _ := kmers.Encode([]byte("TAA"))
+	k2, _ := kmers.Encode([]byte("CTA"))
 	expProf := map[uint64]float64{k1: 1.0, k2: 1.0}
 	if len(obsProf.Profile) != len(expProf) {
 		t.Errorf(
@@ -36,7 +36,7 @@ func TestGetSeqKmers(t *testing.T) {
 		if obsProf.Profile[kmer] != count {
 			t.Errorf(
 				"Wrong count for kmer %s: got %f instead of %f",
-				unikmer.Decode(kmer, obsProf.K),
+				kmers.Decode(kmer, obsProf.K),
 				obsProf.Profile[kmer],
 				count,
 			)
@@ -44,18 +44,18 @@ func TestGetSeqKmers(t *testing.T) {
 	}
 }
 func TestCountsToFreqs(t *testing.T) {
-	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CCTAAA"))
+	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CTAA"))
 	obsProf := NewKmerProfile(3)
 	obsProf.GetSeqKmers(testSeq)
 	obsProf.CountsToFreqs()
-	k1, _ := unikmer.Encode([]byte("AGG"))
-	k2, _ := unikmer.Encode([]byte("CTA"))
+	k1, _ := kmers.Encode([]byte("TAA"))
+	k2, _ := kmers.Encode([]byte("CTA"))
 	expProf := map[uint64]float64{k1: 0.5, k2: 0.5}
 	for kmer, count := range expProf {
 		if obsProf.Profile[kmer] != count {
 			t.Errorf(
 				"Wrong frequency for kmer %s: got %f instead of %f",
-				unikmer.Decode(kmer, obsProf.K),
+				kmers.Decode(kmer, obsProf.K),
 				obsProf.Profile[kmer],
 				count,
 			)
@@ -64,8 +64,8 @@ func TestCountsToFreqs(t *testing.T) {
 
 }
 func TestKmerEuclDist(t *testing.T) {
-	testSeq, _ := seq.NewSeq(seq.DNA, []byte("GCGCGC"))
-	testRef, _ := seq.NewSeq(seq.DNA, []byte("CCTAAA"))
+	testSeq, _ := seq.NewSeq(seq.DNA, []byte("CGCG"))
+	testRef, _ := seq.NewSeq(seq.DNA, []byte("CTAA"))
 	profSeq := NewKmerProfile(3)
 	profRef := NewKmerProfile(3)
 	profSeq.GetSeqKmers(testSeq)
