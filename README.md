@@ -22,7 +22,7 @@ dnaglider only requires a genome. You can also select a window size and what met
 dnaglider -window 1000 -threads 8 -fields "GC,GCSKEW" -fasta ./mygenome.fasta -out gc_stats.tsv
 ```
 
-Instead of working with input / output files, the program reads from stdin and write to stdout by deault:
+Instead of working with input / output files, the program reads from stdin and write to stdout by default:
 
 ```bash
 some command genome.fa | dnaglider -fields "GC,GCSKEW" | grep "chr10" > gc_stats_chr10.tsv
